@@ -11,14 +11,14 @@ func TestSamePassphrase(t *testing.T) {
 	passphrase := "Hello there how are you doing"
 	key1, err := EncryptPassphrase(passphrase)
 	if err != nil {
-		t.Errorf("Error returned: %s", err)
+		t.Errorf("Error returned: %s\n", err)
 	}
 	t.Logf("Returned key is - %v", key1)
 
 	var key2 []byte
 	key2, err = EncryptPassphrase(passphrase)
 	if err != nil {
-		t.Errorf("Error returned: %s", err)
+		t.Errorf("Error returned: %s\n", err)
 	}
 	t.Logf("Returned key is - %v", key2)
 
@@ -32,19 +32,45 @@ func TestSamePassphrase(t *testing.T) {
 // TestVerifyPassphrase checks whether the same passphrase passes the verify
 // function or not
 func TestVerifyPassphrase(t *testing.T) {
+	passphrase_list := []string{
+		"Hello there how are you doing",
+		"this is bad",
+		"oug84-3T[wZHcx*';k;=m",
+	}
+
+	for _, item := range passphrase_list {
+		key, err := EncryptPassphrase(item)
+		if err != nil {
+			t.Errorf("Error returned: %s\n", err)
+		}
+
+		var result bool
+		result, err = VerifyPassphrase(item, key)
+		if err != nil {
+			t.Errorf("Error returned: %s\n", err)
+		}
+		if !result {
+			t.Errorf("Passphrase did not match\n")
+		}
+	}
+}
+
+// TestFailVerifyPassphrase encrypts one passphrase and tests with another
+// passphrase to verify whether it fails or not
+func TestFailVerifyPassphrase(t *testing.T) {
 	passphrase := "Hello there how are you doing"
 
 	key, err := EncryptPassphrase(passphrase)
 	if err != nil {
-		t.Errorf("Error returned: %s", err)
+		t.Errorf("Error returned: %s\n", err)
 	}
 
 	var result bool
-	result, err = VerifyPassphrase(passphrase, key)
+	result, err = VerifyPassphrase("This should fail", key)
 	if err != nil {
-		t.Errorf("Error returned: %s", err)
+		t.Errorf("Error returned: %s\n", err)
 	}
-	if !result {
-		t.Errorf("Passphrase did not match")
+	if result {
+		t.Errorf("The outputs matched whereas it shouldn't have\n")
 	}
 }
