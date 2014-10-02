@@ -3,10 +3,11 @@ easy-scrypt
 
 This is a nice and simple wrapper in Go over the raw scrypt libraries available. There are just 2 calls exposed by the library(and should be!) which makes it super easy to embed in any of your projects.
 
-You can use it to - 
+You can use it to -
+
 1. Safely encrypt and store passwords.
 2. Encrypt a passphrase to get a derived key.
-3. <Let me know if you find other uses .. :)>
+3. Let me know if you find other uses .. :)
 
 The code is go fmt'd.
 
