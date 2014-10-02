@@ -30,7 +30,7 @@ func main() {
 
 	key, err := scrypt.EncryptPassphrase(passphrase)
 	if err != nil {
-		fmt.Errorf("Error returned: %s", err)
+		fmt.Errorf("Error returned: %s\n", err)
 	}
 
 	fmt.Println("Key returned - %v", key)
@@ -38,12 +38,12 @@ func main() {
 
 	result, err = scrypt.VerifyPassphrase(passphrase, key)
 	if err != nil {
-		fmt.Errorf("Error returned: %s", err)
+		fmt.Errorf("Error returned: %s\n", err)
 	}
 	if !result {
-		fmt.Errorf("Passphrase did not match")
+		fmt.Errorf("Passphrase did not match\n")
 	} else {
-		fmt.Println("Passphrase matched successfully")
+		fmt.Printf("Passphrase matched successfully\n")
 	}
 }
 ```
