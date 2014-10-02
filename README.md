@@ -33,7 +33,7 @@ func main() {
 		fmt.Errorf("Error returned: %s\n", err)
 	}
 
-	fmt.Println("Key returned - %v", key)
+	fmt.Printf("Key returned - %v\n", key)
 	var result bool
 
 	result, err = scrypt.VerifyPassphrase(passphrase, key)
