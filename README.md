@@ -14,6 +14,23 @@ The code is go fmt'd.
 Implementation Details
 ----------------------
 
+The scrypt call is invoked with these params -
+N = 16384
+r = 8
+p = 1
+
+The salt is randomly generated from the crypto/rand library which generates a cryptographically secure pseudorandom number.
+
+The returned key will be of x+60 bytes in length where x is the key length passed to the call. They key returned is of this format -
+
+```
+array index starts from left.
+<-----x-----><----16----><--4--><--4--><--4--><----32---->
+    Key           salt      N      r      p   sha-256 hash
+```
+
+A SHA-256 of the entire key is computed and stored at the end to just verify the integrity of the content.
+
 Usage
 -----
 
@@ -28,7 +45,7 @@ import (
 func main() {
 	passphrase := "Hello there this is a sample passphrase"
 
-	key, err := scrypt.EncryptPassphrase(passphrase)
+	key, err := scrypt.EncryptPassphrase(passphrase, 32)
 	if err != nil {
 		fmt.Errorf("Error returned: %s\n", err)
 	}
@@ -36,7 +53,7 @@ func main() {
 	fmt.Printf("Key returned - %v\n", key)
 	var result bool
 
-	result, err = scrypt.VerifyPassphrase(passphrase, key)
+	result, err = scrypt.VerifyPassphrase(passphrase, 32, key)
 	if err != nil {
 		fmt.Errorf("Error returned: %s\n", err)
 	}

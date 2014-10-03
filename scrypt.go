@@ -10,11 +10,10 @@ import (
 	"code.google.com/p/go.crypto/scrypt"
 )
 
-const KeyLenBytes = 32 // choosing 32 because we use AES-256
-
-// EncryptPassphrase returns a 92 bytes encrypted text from the input passphrase.
+// EncryptPassphrase returns a keylen_bytes+60 bytes of encrypted text
+// from the input passphrase.
 // It runs the scrypt function for this.
-func EncryptPassphrase(passphrase string) (key []byte, err error) {
+func EncryptPassphrase(passphrase string, keylen_bytes int) (key []byte, err error) {
 	// Generate salt
 	salt := generateSalt()
 	// Set params
@@ -28,7 +27,7 @@ func EncryptPassphrase(passphrase string) (key []byte, err error) {
 		int(N), // Must be a power of 2 greater than 1
 		int(r),
 		int(p), // r*p must be < 2^30
-		KeyLenBytes)
+		keylen_bytes)
 	if err != nil {
 		log.Fatalf("Error in encrypting passphrase: %s\n", err)
 		return
@@ -64,11 +63,11 @@ func EncryptPassphrase(passphrase string) (key []byte, err error) {
 
 // VerifyPassphrase takes the passphrase and the target_key to match against.
 // And returns a boolean result whether it matched or not
-func VerifyPassphrase(passphrase string, target_key []byte) (result bool, err error) {
+func VerifyPassphrase(passphrase string, keylen_bytes int, target_key []byte) (result bool, err error) {
 	// Get the master_key
-	target_master_key := target_key[:32]
+	target_master_key := target_key[:keylen_bytes]
 	// Get the salt
-	salt := target_key[32:48]
+	salt := target_key[keylen_bytes:48]
 	// Get the params
 	var N, r, p int32
 
@@ -101,7 +100,7 @@ func VerifyPassphrase(passphrase string, target_key []byte) (result bool, err er
 		int(N), // Must be a power of 2 greater than 1
 		int(r),
 		int(p), // r*p must be < 2^30
-		KeyLenBytes)
+		keylen_bytes)
 	if err != nil {
 		log.Fatalf("Error in encrypting passphrase: %s\n", err)
 		return

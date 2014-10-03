@@ -9,14 +9,14 @@ import (
 // due to random salt everytime
 func TestSamePassphrase(t *testing.T) {
 	passphrase := "Hello there how are you doing"
-	key1, err := EncryptPassphrase(passphrase)
+	key1, err := EncryptPassphrase(passphrase, 34)
 	if err != nil {
 		t.Errorf("Error returned: %s\n", err)
 	}
 	t.Logf("Returned key is - %v", key1)
 
 	var key2 []byte
-	key2, err = EncryptPassphrase(passphrase)
+	key2, err = EncryptPassphrase(passphrase, 34)
 	if err != nil {
 		t.Errorf("Error returned: %s\n", err)
 	}
@@ -39,13 +39,13 @@ func TestVerifyPassphrase(t *testing.T) {
 	}
 
 	for _, item := range passphrase_list {
-		key, err := EncryptPassphrase(item)
+		key, err := EncryptPassphrase(item, 32)
 		if err != nil {
 			t.Errorf("Error returned: %s\n", err)
 		}
 
 		var result bool
-		result, err = VerifyPassphrase(item, key)
+		result, err = VerifyPassphrase(item, 32, key)
 		if err != nil {
 			t.Errorf("Error returned: %s\n", err)
 		}
@@ -60,13 +60,13 @@ func TestVerifyPassphrase(t *testing.T) {
 func TestFailVerifyPassphrase(t *testing.T) {
 	passphrase := "Hello there how are you doing"
 
-	key, err := EncryptPassphrase(passphrase)
+	key, err := EncryptPassphrase(passphrase, 32)
 	if err != nil {
 		t.Errorf("Error returned: %s\n", err)
 	}
 
 	var result bool
-	result, err = VerifyPassphrase("This should fail", key)
+	result, err = VerifyPassphrase("This should fail", 32, key)
 	if err != nil {
 		t.Errorf("Error returned: %s\n", err)
 	}
