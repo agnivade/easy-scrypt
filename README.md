@@ -21,15 +21,20 @@ p = 1
 
 The salt is randomly generated from the crypto/rand library which generates a cryptographically secure pseudorandom number.
 
-The returned key will be of x+60 bytes in length where x is the key length passed to the call. They key returned is of this format -
+The returned key will be of x+60 bytes in length where x is the key length passed to the call. The key returned is of this format -
 
 ```
 array index starts from left.
 <-----x-----><----16----><--4--><--4--><--4--><----32---->
-    Key           salt      N      r      p   sha-256 hash
+    dKey          salt      N      r      p   sha-256 hash
 ```
 
-A SHA-256 of the entire key is computed and stored at the end to just verify the integrity of the content.
+A SHA-256 of the entire content(dKey+salt+n+r+p) is computed and stored at the end to just verify the integrity of the content.
+
+Documentation
+-------------
+
+[GoDoc link](http://godoc.org/github.com/agnivade/easy-scrypt)
 
 Usage
 -----
