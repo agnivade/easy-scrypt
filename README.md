@@ -5,8 +5,8 @@ This is a nice and simple wrapper in Go over the raw scrypt libraries available.
 
 You can use it to -
 
-1. Safely encrypt and store passwords.
-2. Encrypt a passphrase to get a derived key.
+1. Safely hash passwords.
+2. Hash a passphrase to get a derived key.
 3. Let me know if you find other uses .. :)
 
 The code is go fmt'd.
@@ -50,7 +50,7 @@ import (
 func main() {
 	passphrase := "Hello there this is a sample passphrase"
 
-	key, err := scrypt.EncryptPassphrase(passphrase, 32)
+	key, err := scrypt.DerivePassphrase(passphrase, 32)
 	if err != nil {
 		fmt.Errorf("Error returned: %s\n", err)
 	}
@@ -58,7 +58,7 @@ func main() {
 	fmt.Printf("Key returned - %v\n", key)
 	var result bool
 
-	result, err = scrypt.VerifyPassphrase(passphrase, 32, key)
+	result, err = scrypt.VerifyPassphrase(passphrase, key)
 	if err != nil {
 		fmt.Errorf("Error returned: %s\n", err)
 	}

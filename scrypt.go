@@ -11,10 +11,10 @@ import (
 	"code.google.com/p/go.crypto/scrypt"
 )
 
-// EncryptPassphrase returns a keylen_bytes+60 bytes of encrypted text
+// DerivePassphrase returns a keylen_bytes+60 bytes of derived text
 // from the input passphrase.
 // It runs the scrypt function for this.
-func EncryptPassphrase(passphrase string, keylen_bytes int) (key []byte, err error) {
+func DerivePassphrase(passphrase string, keylen_bytes int) (key []byte, err error) {
 	// Generate salt
 	salt := generateSalt()
 	// Set params
@@ -30,7 +30,7 @@ func EncryptPassphrase(passphrase string, keylen_bytes int) (key []byte, err err
 		int(p), // r*p must be < 2^30
 		keylen_bytes)
 	if err != nil {
-		log.Fatalf("Error in encrypting passphrase: %s\n", err)
+		log.Fatalf("Error in deriving passphrase: %s\n", err)
 		return
 	}
 
@@ -64,7 +64,8 @@ func EncryptPassphrase(passphrase string, keylen_bytes int) (key []byte, err err
 
 // VerifyPassphrase takes the passphrase and the target_key to match against.
 // And returns a boolean result whether it matched or not
-func VerifyPassphrase(passphrase string, keylen_bytes int, target_key []byte) (result bool, err error) {
+func VerifyPassphrase(passphrase string, target_key []byte) (result bool, err error) {
+	keylen_bytes := len(target_key) - 60
 	// Get the master_key
 	target_master_key := target_key[:keylen_bytes]
 	// Get the salt
@@ -103,7 +104,7 @@ func VerifyPassphrase(passphrase string, keylen_bytes int, target_key []byte) (r
 		int(p), // r*p must be < 2^30
 		keylen_bytes)
 	if err != nil {
-		log.Fatalf("Error in encrypting passphrase: %s\n", err)
+		log.Fatalf("Error in deriving passphrase: %s\n", err)
 		return
 	}
 
