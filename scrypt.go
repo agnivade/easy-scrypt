@@ -30,7 +30,7 @@ func DerivePassphrase(passphrase string, keylen_bytes int) (key []byte, err erro
 		int(p), // r*p must be < 2^30
 		keylen_bytes)
 	if err != nil {
-		log.Fatalf("Error in deriving passphrase: %s\n", err)
+		log.Printf("Error in deriving passphrase: %s\n", err)
 		return
 	}
 
@@ -42,7 +42,7 @@ func DerivePassphrase(passphrase string, keylen_bytes int) (key []byte, err erro
 	for _, elem := range [3]int32{N, r, p} {
 		err = binary.Write(buf, binary.LittleEndian, elem)
 		if err != nil {
-			log.Fatalf("binary.Write failed: %s\n", err)
+			log.Printf("binary.Write failed: %s\n", err)
 			return
 		}
 		key = append(key, buf.Bytes()...)
@@ -53,7 +53,7 @@ func DerivePassphrase(passphrase string, keylen_bytes int) (key []byte, err erro
 	hash_digest := sha256.New()
 	hash_digest.Write(key)
 	if err != nil {
-		log.Fatalf("hash_digest.Write failed: %s\n", err)
+		log.Printf("hash_digest.Write failed: %s\n", err)
 		return
 	}
 	hash := hash_digest.Sum(nil)
@@ -77,7 +77,7 @@ func VerifyPassphrase(passphrase string, target_key []byte) (result bool, err er
 		binary.LittleEndian,
 		&N)
 	if err != nil {
-		log.Fatalf("binary.Read failed for N: %s\n", err)
+		log.Printf("binary.Read failed for N: %s\n", err)
 		return
 	}
 
@@ -85,7 +85,7 @@ func VerifyPassphrase(passphrase string, target_key []byte) (result bool, err er
 		binary.LittleEndian,
 		&r)
 	if err != nil {
-		log.Fatalf("binary.Read failed for r: %s\n", err)
+		log.Printf("binary.Read failed for r: %s\n", err)
 		return
 	}
 
@@ -93,7 +93,7 @@ func VerifyPassphrase(passphrase string, target_key []byte) (result bool, err er
 		binary.LittleEndian,
 		&p)
 	if err != nil {
-		log.Fatalf("binary.Read failed for p: %s\n", err)
+		log.Printf("binary.Read failed for p: %s\n", err)
 		return
 	}
 	var source_master_key []byte
@@ -104,7 +104,7 @@ func VerifyPassphrase(passphrase string, target_key []byte) (result bool, err er
 		int(p), // r*p must be < 2^30
 		keylen_bytes)
 	if err != nil {
-		log.Fatalf("Error in deriving passphrase: %s\n", err)
+		log.Printf("Error in deriving passphrase: %s\n", err)
 		return
 	}
 
@@ -114,7 +114,7 @@ func VerifyPassphrase(passphrase string, target_key []byte) (result bool, err er
 	hash_digest := sha256.New()
 	_, err = hash_digest.Write(target_key[:60])
 	if err != nil {
-		log.Fatalf("hash_digest.Write failed: %s\n", err)
+		log.Printf("hash_digest.Write failed: %s\n", err)
 		return
 	}
 	source_hash := hash_digest.Sum(nil)
@@ -132,7 +132,7 @@ func generateSalt() (salt []byte) {
 	salt = make([]byte, 16)
 	_, err := rand.Read(salt)
 	if err != nil {
-		log.Fatalf("Error in generating salt: %s\n", err)
+		log.Printf("Error in generating salt: %s\n", err)
 		return
 	}
 	return
