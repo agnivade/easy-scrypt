@@ -8,7 +8,7 @@ import (
 	"encoding/binary"
 	"log"
 
-	"code.google.com/p/go.crypto/scrypt"
+	"golang.org/x/crypto/scrypt"
 )
 
 // DerivePassphrase returns a keylen_bytes+60 bytes of derived text
