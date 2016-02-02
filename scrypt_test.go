@@ -36,6 +36,8 @@ func TestVerifyPassphrase(t *testing.T) {
 		"Hello there how are you doing",
 		"this is bad",
 		"oug84-3T[wZHcx*';k;=m",
+		"指事字 zhǐshìzì",
+		" الأَبْجَدِيَّة العَرَبِيَّة",
 	}
 
 	for _, item := range passphrase_list {
