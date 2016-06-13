@@ -1,4 +1,4 @@
-easy-scrypt
+easy-scrypt [![Build Status](https://travis-ci.org/agnivade/easy-scrypt.svg?branch=master)](https://travis-ci.org/agnivade/easy-scrypt)
 ===========
 
 This is a nice and simple wrapper in Go over the raw scrypt libraries available. There are just 2 calls exposed by the library(and should be!) which makes it super easy to embed in any of your projects.
