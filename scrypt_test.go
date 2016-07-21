@@ -12,6 +12,7 @@ func TestSamePassphrase(t *testing.T) {
 	key1, err := DerivePassphrase(passphrase, 34)
 	if err != nil {
 		t.Errorf("Error returned: %s\n", err)
+		return
 	}
 	t.Logf("Returned key is - %v", key1)
 
@@ -19,6 +20,7 @@ func TestSamePassphrase(t *testing.T) {
 	key2, err = DerivePassphrase(passphrase, 34)
 	if err != nil {
 		t.Errorf("Error returned: %s\n", err)
+		return
 	}
 	t.Logf("Returned key is - %v", key2)
 
@@ -44,12 +46,14 @@ func TestVerifyPassphrase(t *testing.T) {
 		key, err := DerivePassphrase(item, 32)
 		if err != nil {
 			t.Errorf("Error returned: %s\n", err)
+			return
 		}
 
 		var result bool
 		result, err = VerifyPassphrase(item, key)
 		if err != nil {
 			t.Errorf("Error returned: %s\n", err)
+			return
 		}
 		if !result {
 			t.Errorf("Passphrase did not match\n")
@@ -65,12 +69,14 @@ func TestFailVerifyPassphrase(t *testing.T) {
 	key, err := DerivePassphrase(passphrase, 32)
 	if err != nil {
 		t.Errorf("Error returned: %s\n", err)
+		return
 	}
 
 	var result bool
 	result, err = VerifyPassphrase("This should fail", key)
 	if err != nil {
 		t.Errorf("Error returned: %s\n", err)
+		return
 	}
 	if result {
 		t.Errorf("The outputs matched whereas it shouldn't have\n")
