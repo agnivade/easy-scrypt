@@ -6,7 +6,6 @@ import (
 	"crypto/sha256"
 	"crypto/subtle"
 	"encoding/binary"
-	"log"
 
 	"golang.org/x/crypto/scrypt"
 )
@@ -14,24 +13,26 @@ import (
 // DerivePassphrase returns a keylen_bytes+60 bytes of derived text
 // from the input passphrase.
 // It runs the scrypt function for this.
-func DerivePassphrase(passphrase string, keylen_bytes int) (key []byte, err error) {
+func DerivePassphrase(passphrase string, keylen_bytes int) ([]byte, error) {
 	// Generate salt
-	salt := generateSalt()
+	salt, err := generateSalt()
+	if err != nil {
+		return nil, err
+	}
 	// Set params
 	var N int32 = 16384
 	var r int32 = 8
 	var p int32 = 1
 
 	// Generate key
-	key, err = scrypt.Key([]byte(passphrase),
+	key, err := scrypt.Key([]byte(passphrase),
 		salt,
 		int(N), // Must be a power of 2 greater than 1
 		int(r),
 		int(p), // r*p must be < 2^30
 		keylen_bytes)
 	if err != nil {
-		log.Printf("Error in deriving passphrase: %s\n", err)
-		return
+		return nil, err
 	}
 
 	// Appending the salt
@@ -42,8 +43,7 @@ func DerivePassphrase(passphrase string, keylen_bytes int) (key []byte, err erro
 	for _, elem := range [3]int32{N, r, p} {
 		err = binary.Write(buf, binary.LittleEndian, elem)
 		if err != nil {
-			log.Printf("binary.Write failed: %s\n", err)
-			return
+			return nil, err
 		}
 		key = append(key, buf.Bytes()...)
 		buf.Reset()
@@ -53,18 +53,17 @@ func DerivePassphrase(passphrase string, keylen_bytes int) (key []byte, err erro
 	hash_digest := sha256.New()
 	hash_digest.Write(key)
 	if err != nil {
-		log.Printf("hash_digest.Write failed: %s\n", err)
-		return
+		return nil, err
 	}
 	hash := hash_digest.Sum(nil)
 	key = append(key, hash...)
 
-	return
+	return key, nil
 }
 
 // VerifyPassphrase takes the passphrase and the target_key to match against.
 // And returns a boolean result whether it matched or not
-func VerifyPassphrase(passphrase string, target_key []byte) (result bool, err error) {
+func VerifyPassphrase(passphrase string, target_key []byte) (bool, error) {
 	keylen_bytes := len(target_key) - 60
 	// Get the master_key
 	target_master_key := target_key[:keylen_bytes]
@@ -73,39 +72,34 @@ func VerifyPassphrase(passphrase string, target_key []byte) (result bool, err er
 	// Get the params
 	var N, r, p int32
 
-	err = binary.Read(bytes.NewReader(target_key[48:52]), // byte 48:52 for N
+	err := binary.Read(bytes.NewReader(target_key[48:52]), // byte 48:52 for N
 		binary.LittleEndian,
 		&N)
 	if err != nil {
-		log.Printf("binary.Read failed for N: %s\n", err)
-		return
+		return false, err
 	}
 
 	err = binary.Read(bytes.NewReader(target_key[52:56]), // byte 52:56 for r
 		binary.LittleEndian,
 		&r)
 	if err != nil {
-		log.Printf("binary.Read failed for r: %s\n", err)
-		return
+		return false, err
 	}
 
 	err = binary.Read(bytes.NewReader(target_key[56:60]), // byte 56:60 for p
 		binary.LittleEndian,
 		&p)
 	if err != nil {
-		log.Printf("binary.Read failed for p: %s\n", err)
-		return
+		return false, err
 	}
-	var source_master_key []byte
-	source_master_key, err = scrypt.Key([]byte(passphrase),
+	source_master_key, err := scrypt.Key([]byte(passphrase),
 		salt,
 		int(N), // Must be a power of 2 greater than 1
 		int(r),
 		int(p), // r*p must be < 2^30
 		keylen_bytes)
 	if err != nil {
-		log.Printf("Error in deriving passphrase: %s\n", err)
-		return
+		return false, err
 	}
 
 	target_hash := target_key[60:]
@@ -114,8 +108,7 @@ func VerifyPassphrase(passphrase string, target_key []byte) (result bool, err er
 	hash_digest := sha256.New()
 	_, err = hash_digest.Write(target_key[:60])
 	if err != nil {
-		log.Printf("hash_digest.Write failed: %s\n", err)
-		return
+		return false, err
 	}
 	source_hash := hash_digest.Sum(nil)
 
@@ -124,16 +117,15 @@ func VerifyPassphrase(passphrase string, target_key []byte) (result bool, err er
 		target_master_key) != 0
 	hash_comp := subtle.ConstantTimeCompare(target_hash,
 		source_hash) != 0
-	result = key_comp && hash_comp
-	return
+	result := key_comp && hash_comp
+	return result, nil
 }
 
-func generateSalt() (salt []byte) {
-	salt = make([]byte, 16)
+func generateSalt() ([]byte, error) {
+	salt := make([]byte, 16)
 	_, err := rand.Read(salt)
 	if err != nil {
-		log.Printf("Error in generating salt: %s\n", err)
-		return
+		return nil, err
 	}
-	return
+	return salt, nil
 }
