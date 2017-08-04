@@ -28,7 +28,6 @@ func TestSamePassphrase(t *testing.T) {
 		t.Errorf("The 2 keys are the same for the same passphrase. Key1- %b, Key2- %b",
 			key1, key2)
 	}
-
 }
 
 // TestVerifyPassphrase checks whether the same passphrase passes the verify
@@ -80,5 +79,21 @@ func TestFailVerifyPassphrase(t *testing.T) {
 	}
 	if result {
 		t.Errorf("The outputs matched whereas it shouldn't have\n")
+	}
+}
+
+func BenchmarkDerivePassphrase(b *testing.B) {
+	passphrase := "Hello there how are you doing"
+	for n := 0; n < b.N; n++ {
+		DerivePassphrase(passphrase, 32)
+	}
+}
+
+func BenchmarkVerifyPassphrase(b *testing.B) {
+	passphrase := "Hello there how are you doing"
+	key, _ := DerivePassphrase(passphrase, 32)
+
+	for n := 0; n < b.N; n++ {
+		VerifyPassphrase(passphrase, key)
 	}
 }
