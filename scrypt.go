@@ -10,6 +10,12 @@ import (
 	"golang.org/x/crypto/scrypt"
 )
 
+const (
+	N = 16384
+	r = 8
+	p = 1
+)
+
 // DerivePassphrase returns a keylen_bytes+60 bytes of derived text
 // from the input passphrase.
 // It runs the scrypt function for this.
@@ -19,17 +25,13 @@ func DerivePassphrase(passphrase string, keylen_bytes int) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	// Set params
-	var N int32 = 16384
-	var r int32 = 8
-	var p int32 = 1
 
 	// Generate key
 	key, err := scrypt.Key([]byte(passphrase),
 		salt,
-		int(N), // Must be a power of 2 greater than 1
-		int(r),
-		int(p), // r*p must be < 2^30
+		N, // Must be a power of 2 greater than 1
+		r,
+		p, // r*p must be < 2^30
 		keylen_bytes)
 	if err != nil {
 		return nil, err
@@ -39,15 +41,15 @@ func DerivePassphrase(passphrase string, keylen_bytes int) ([]byte, error) {
 	key = append(key, salt...)
 
 	// Encoding the params to be stored
-	buf := new(bytes.Buffer)
-	for _, elem := range [3]int32{N, r, p} {
-		err = binary.Write(buf, binary.LittleEndian, elem)
+	buf := &bytes.Buffer{}
+	for _, elem := range [3]int{N, r, p} {
+		err = binary.Write(buf, binary.LittleEndian, int32(elem))
 		if err != nil {
 			return nil, err
 		}
-		key = append(key, buf.Bytes()...)
-		buf.Reset()
 	}
+	key = append(key, buf.Bytes()...)
+	buf.Reset()
 
 	// appending the sha-256 of the entire header at the end
 	hash_digest := sha256.New()
