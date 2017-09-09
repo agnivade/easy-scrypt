@@ -32,7 +32,7 @@ func TestSamePassphrase(t *testing.T) {
 // TestVerifyPassphrase checks whether the same passphrase passes the verify
 // function or not
 func TestVerifyPassphrase(t *testing.T) {
-	passphrase_list := []struct {
+	passphrases := []struct {
 		passphrase string
 		length     int
 	}{
@@ -43,7 +43,7 @@ func TestVerifyPassphrase(t *testing.T) {
 		{" الأَبْجَدِيَّة العَرَبِيَّة", 30},
 	}
 
-	for i, item := range passphrase_list {
+	for i, item := range passphrases {
 		key, err := DerivePassphrase(item.passphrase, item.length)
 		if err != nil {
 			t.Errorf("[%d]: DerivePassphrase failed with: %v\n", i, err)
