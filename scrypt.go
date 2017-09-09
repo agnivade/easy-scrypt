@@ -6,6 +6,7 @@ import (
 	"crypto/sha256"
 	"crypto/subtle"
 	"encoding/binary"
+	"errors"
 
 	"golang.org/x/crypto/scrypt"
 )
@@ -69,6 +70,9 @@ func DerivePassphrase(passphrase string, keylen_bytes int) ([]byte, error) {
 // And returns a boolean result whether it matched or not
 func VerifyPassphrase(passphrase string, target_key []byte) (bool, error) {
 	keylen_bytes := len(target_key) - metadataLenBytes
+	if keylen_bytes < 1 {
+		return false, errors.New("Invalid target_key length")
+	}
 	// Get the master_key
 	target_master_key := target_key[:keylen_bytes]
 	// Get the salt
