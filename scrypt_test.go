@@ -14,7 +14,6 @@ func TestSamePassphrase(t *testing.T) {
 		t.Errorf("DerivePassphrase failed with: %v\n", err)
 		return
 	}
-	t.Logf("Returned key is - %v", key1)
 
 	var key2 []byte
 	key2, err = DerivePassphrase(passphrase, 34)

@@ -53,11 +53,10 @@ func DerivePassphrase(passphrase string, keylenBytes int) ([]byte, error) {
 		}
 	}
 	key = append(key, buf.Bytes()...)
-	buf.Reset()
 
 	// appending the sha-256 of the entire header at the end
 	hashDigest := sha256.New()
-	hashDigest.Write(key)
+	_, err = hashDigest.Write(key)
 	if err != nil {
 		return nil, err
 	}
@@ -123,10 +122,8 @@ func VerifyPassphrase(passphrase string, targetKey []byte) (bool, error) {
 	sourceHash := hashDigest.Sum(nil)
 
 	// ConstantTimeCompare returns ints. Converting it to bool
-	keyComp := subtle.ConstantTimeCompare(sourceMasterKey,
-		targetMasterKey) != 0
-	hashComp := subtle.ConstantTimeCompare(targetHash,
-		sourceHash) != 0
+	keyComp := subtle.ConstantTimeCompare(sourceMasterKey, targetMasterKey) != 0
+	hashComp := subtle.ConstantTimeCompare(targetHash, sourceHash) != 0
 	result := keyComp && hashComp
 	return result, nil
 }
