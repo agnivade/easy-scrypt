@@ -11,7 +11,7 @@ func TestSamePassphrase(t *testing.T) {
 	passphrase := "Hello there how are you doing"
 	key1, err := DerivePassphrase(passphrase, 34)
 	if err != nil {
-		t.Errorf("Error returned: %s\n", err)
+		t.Errorf("DerivePassphrase failed with: %v\n", err)
 		return
 	}
 	t.Logf("Returned key is - %v", key1)
@@ -19,10 +19,9 @@ func TestSamePassphrase(t *testing.T) {
 	var key2 []byte
 	key2, err = DerivePassphrase(passphrase, 34)
 	if err != nil {
-		t.Errorf("Error returned: %s\n", err)
+		t.Errorf("DerivePassphrase failed with: %v\n", err)
 		return
 	}
-	t.Logf("Returned key is - %v", key2)
 
 	if bytes.Equal(key1, key2) {
 		t.Errorf("The 2 keys are the same for the same passphrase. Key1- %b, Key2- %b",
@@ -44,17 +43,17 @@ func TestVerifyPassphrase(t *testing.T) {
 		{" الأَبْجَدِيَّة العَرَبِيَّة", 30},
 	}
 
-	for _, item := range passphrase_list {
+	for i, item := range passphrase_list {
 		key, err := DerivePassphrase(item.passphrase, item.length)
 		if err != nil {
-			t.Errorf("Error returned: %s\n", err)
+			t.Errorf("[%d]: DerivePassphrase failed with: %v\n", i, err)
 			return
 		}
 
 		var result bool
 		result, err = VerifyPassphrase(item.passphrase, key)
 		if err != nil {
-			t.Errorf("Error returned: %s\n", err)
+			t.Errorf("[%d]: VerifyPassphrase failed with: %v\n", i, err)
 			return
 		}
 		if !result {
@@ -70,18 +69,28 @@ func TestFailVerifyPassphrase(t *testing.T) {
 
 	key, err := DerivePassphrase(passphrase, 32)
 	if err != nil {
-		t.Errorf("Error returned: %s\n", err)
+		t.Errorf("DerivePassphrase failed with: %v\n", err)
 		return
 	}
 
 	var result bool
 	result, err = VerifyPassphrase("This should fail", key)
 	if err != nil {
-		t.Errorf("Error returned: %s\n", err)
+		t.Errorf("VerifyPassphrase failed with: %v\n", err)
 		return
 	}
 	if result {
 		t.Errorf("The outputs matched whereas it shouldn't have\n")
+	}
+}
+
+// TestFailVerifyLenPassphrase derives one passphrase and tests with another
+// passphrase of a smaller len to check that it does not panic
+func TestFailVerifyLenPassphrase(t *testing.T) {
+	_, err := VerifyPassphrase("This should not panic", []byte("s"))
+	if err == nil {
+		t.Errorf("Unexpected nil error. Expected error.")
+		return
 	}
 }
 
