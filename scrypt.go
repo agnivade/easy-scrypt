@@ -11,6 +11,7 @@ import (
 	"golang.org/x/crypto/scrypt"
 )
 
+// Some constants used throughout the code
 const (
 	N                = 16384
 	r                = 8
@@ -19,10 +20,10 @@ const (
 	saltLenBytes     = 16
 )
 
-// DerivePassphrase returns a keylen_bytes+60 bytes of derived text
+// DerivePassphrase returns a keylenBytes+60 bytes of derived text
 // from the input passphrase.
 // It runs the scrypt function for this.
-func DerivePassphrase(passphrase string, keylen_bytes int) ([]byte, error) {
+func DerivePassphrase(passphrase string, keylenBytes int) ([]byte, error) {
 	// Generate salt
 	salt, err := generateSalt()
 	if err != nil {
@@ -35,7 +36,7 @@ func DerivePassphrase(passphrase string, keylen_bytes int) ([]byte, error) {
 		N, // Must be a power of 2 greater than 1
 		r,
 		p, // r*p must be < 2^30
-		keylen_bytes)
+		keylenBytes)
 	if err != nil {
 		return nil, err
 	}
@@ -55,78 +56,78 @@ func DerivePassphrase(passphrase string, keylen_bytes int) ([]byte, error) {
 	buf.Reset()
 
 	// appending the sha-256 of the entire header at the end
-	hash_digest := sha256.New()
-	hash_digest.Write(key)
+	hashDigest := sha256.New()
+	hashDigest.Write(key)
 	if err != nil {
 		return nil, err
 	}
-	hash := hash_digest.Sum(nil)
+	hash := hashDigest.Sum(nil)
 	key = append(key, hash...)
 
 	return key, nil
 }
 
-// VerifyPassphrase takes the passphrase and the target_key to match against.
+// VerifyPassphrase takes the passphrase and the targetKey to match against.
 // And returns a boolean result whether it matched or not
-func VerifyPassphrase(passphrase string, target_key []byte) (bool, error) {
-	keylen_bytes := len(target_key) - metadataLenBytes
-	if keylen_bytes < 1 {
-		return false, errors.New("Invalid target_key length")
+func VerifyPassphrase(passphrase string, targetKey []byte) (bool, error) {
+	keylenBytes := len(targetKey) - metadataLenBytes
+	if keylenBytes < 1 {
+		return false, errors.New("Invalid targetKey length")
 	}
 	// Get the master_key
-	target_master_key := target_key[:keylen_bytes]
+	targetMasterKey := targetKey[:keylenBytes]
 	// Get the salt
-	salt := target_key[keylen_bytes : keylen_bytes+saltLenBytes]
+	salt := targetKey[keylenBytes : keylenBytes+saltLenBytes]
 	// Get the params
 	var N, r, p int32
-	paramsStartIndex := keylen_bytes + saltLenBytes
+	paramsStartIndex := keylenBytes + saltLenBytes
 
-	err := binary.Read(bytes.NewReader(target_key[paramsStartIndex:paramsStartIndex+4]), // 4 bytes for N
+	err := binary.Read(bytes.NewReader(targetKey[paramsStartIndex:paramsStartIndex+4]), // 4 bytes for N
 		binary.LittleEndian,
 		&N)
 	if err != nil {
 		return false, err
 	}
 
-	err = binary.Read(bytes.NewReader(target_key[paramsStartIndex+4:paramsStartIndex+8]), // 4 bytes for r
+	err = binary.Read(bytes.NewReader(targetKey[paramsStartIndex+4:paramsStartIndex+8]), // 4 bytes for r
 		binary.LittleEndian,
 		&r)
 	if err != nil {
 		return false, err
 	}
 
-	err = binary.Read(bytes.NewReader(target_key[paramsStartIndex+8:paramsStartIndex+12]), // 4 bytes for p
+	err = binary.Read(bytes.NewReader(targetKey[paramsStartIndex+8:paramsStartIndex+12]), // 4 bytes for p
 		binary.LittleEndian,
 		&p)
 	if err != nil {
 		return false, err
 	}
-	source_master_key, err := scrypt.Key([]byte(passphrase),
+	sourceMasterKey, err := scrypt.Key([]byte(passphrase),
 		salt,
 		int(N), // Must be a power of 2 greater than 1
 		int(r),
 		int(p), // r*p must be < 2^30
-		keylen_bytes)
+		keylenBytes)
 	if err != nil {
 		return false, err
 	}
 
-	target_hash := target_key[paramsStartIndex+12:]
+	targetHash := targetKey[paramsStartIndex+12:]
 	// Doing the sha-256 checksum at the last because we want the attacker
 	// to spend as much time possible cracking
-	hash_digest := sha256.New()
-	_, err = hash_digest.Write(target_key[:paramsStartIndex+12])
+	hashDigest := sha256.New()
+	_, err = hashDigest.Write(targetKey[:paramsStartIndex+12])
 	if err != nil {
 		return false, err
 	}
-	source_hash := hash_digest.Sum(nil)
+	sourceHash := hashDigest.Sum(nil)
 
 	// ConstantTimeCompare returns ints. Converting it to bool
-	key_comp := subtle.ConstantTimeCompare(source_master_key,
-		target_master_key) != 0
-	hash_comp := subtle.ConstantTimeCompare(target_hash,
-		source_hash) != 0
-	result := key_comp && hash_comp
+	keyComp := subtle.ConstantTimeCompare(sourceMasterKey,
+		targetMasterKey) != 0
+	hashComp := subtle.ConstantTimeCompare(targetHash,
+		sourceHash) != 0
+	result := keyComp && hashComp
 	return result, nil
 }
 
