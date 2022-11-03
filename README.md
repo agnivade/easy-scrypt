@@ -1,4 +1,4 @@
-easy-scrypt [![Build Status](https://travis-ci.org/agnivade/easy-scrypt.svg?branch=master)](https://travis-ci.org/agnivade/easy-scrypt) [![Go Report Card](https://goreportcard.com/badge/github.com/agnivade/easy-scrypt)](https://goreportcard.com/report/github.com/agnivade/easy-scrypt) [![codecov](https://codecov.io/gh/agnivade/easy-scrypt/branch/master/graph/badge.svg)](https://codecov.io/gh/agnivade/easy-scrypt) [![GoDoc](https://godoc.org/github.com/agnivade/easy-scrypt?status.svg)](https://godoc.org/github.com/agnivade/easy-scrypt)
+easy-scrypt [![Go Report Card](https://goreportcard.com/badge/github.com/agnivade/easy-scrypt)](https://goreportcard.com/report/github.com/agnivade/easy-scrypt) [![codecov](https://codecov.io/gh/agnivade/easy-scrypt/branch/master/graph/badge.svg)](https://codecov.io/gh/agnivade/easy-scrypt) [![GoDoc](https://godoc.org/github.com/agnivade/easy-scrypt?status.svg)](https://godoc.org/github.com/agnivade/easy-scrypt)
 ===========
 
 This is a nice and simple wrapper in Go over the raw scrypt libraries available. There are just 2 calls exposed by the library(and should be!) which makes it super easy to embed in any of your projects.
